@@ -1,6 +1,6 @@
 package br.com.alura.service;
 
-import br.com.alura.Pet;
+import br.com.alura.dominio.Pet;
 import com.google.gson.Gson;
 
 import java.io.IOException;

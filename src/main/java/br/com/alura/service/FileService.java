@@ -1,7 +1,7 @@
 package br.com.alura.service;
 
-import br.com.alura.Pet;
-import br.com.alura.TipoPet;
+import br.com.alura.dominio.Pet;
+import br.com.alura.dominio.TipoPet;
 
 import java.io.*;
 import java.net.http.HttpClient;
@@ -13,19 +13,10 @@ public class FileService {
 
     public void importFile(File file, HttpClient client, PetService petService) {
         List<Pet> petList = new ArrayList<>();
-        try {
-            InputStream in = new FileInputStream(file);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] properties = line.split(";");
-                Pet pet = new Pet(UUID.fromString(properties[0]), properties[1], TipoPet.Cachorro);
-                System.out.println(pet);
-                petList.add(pet);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        String[] properties = readFile(file);
+        Pet newPet = new Pet(UUID.fromString(properties[0]), properties[1], TipoPet.Cachorro);
+        System.out.println(newPet);
+        petList.add(newPet);
         for (Pet pet : petList) {
             try {
                 petService.createPetAsync(client, pet);
@@ -37,6 +28,13 @@ public class FileService {
     }
 
     public void showFile(File file) {
+        String[] properties = readFile(file);
+        Pet pet = new Pet(UUID.fromString(properties[0]), properties[1], TipoPet.Cachorro);
+        System.out.println(pet);
+    }
+
+    private String[] readFile(File file) {
+        String[] properties = null;
         try {
             InputStream in = new FileInputStream(file);
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
@@ -44,12 +42,12 @@ public class FileService {
             System.out.println("----- Serão importados os dados abaixo -----");
             String line;
             while ((line = reader.readLine()) != null) {
-                String[] properties = line.split(";");
-                Pet pet = new Pet(UUID.fromString(properties[0]), properties[1], TipoPet.Cachorro);
-                System.out.println(pet);
+                properties = line.split(";");
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return properties;
     }
 }

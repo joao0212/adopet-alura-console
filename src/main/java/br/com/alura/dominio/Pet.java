@@ -1,4 +1,4 @@
-package br.com.alura;
+package br.com.alura.dominio;
 
 import java.util.UUID;
 
