@@ -12,6 +12,8 @@ import java.util.UUID;
 public class FileService {
 
     public void importFile(File file, HttpClient client, PetService petService) {
+        System.out.println("----- Serão importados os dados abaixo -----");
+
         List<Pet> petList = new ArrayList<>();
         try {
             InputStream in = new FileInputStream(file);
@@ -19,7 +21,7 @@ public class FileService {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] properties = line.split(";");
-                Pet pet = new Pet(UUID.fromString(properties[0]), properties[1], TipoPet.Cachorro);
+                Pet pet = new Pet(UUID.fromString(properties[0]), properties[1], TipoPet.valueOf(properties[2]));
                 System.out.println(pet);
                 petList.add(pet);
             }
@@ -41,11 +43,10 @@ public class FileService {
             InputStream in = new FileInputStream(file);
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 
-            System.out.println("----- Serão importados os dados abaixo -----");
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] properties = line.split(";");
-                Pet pet = new Pet(UUID.fromString(properties[0]), properties[1], TipoPet.Cachorro);
+                Pet pet = new Pet(UUID.fromString(properties[0]), properties[1], TipoPet.valueOf(properties[2]));
                 System.out.println(pet);
             }
         } catch (IOException e) {

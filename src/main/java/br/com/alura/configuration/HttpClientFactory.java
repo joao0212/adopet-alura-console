@@ -4,7 +4,7 @@ import java.net.http.HttpClient;
 
 public class HttpClientFactory {
 
-    public HttpClient configureHttpClient(String url) {
+    public HttpClient configureHttpClient() {
         HttpClient client = HttpClient.newHttpClient();
         client = client.newBuilder()
                 .version(HttpClient.Version.HTTP_1_1)

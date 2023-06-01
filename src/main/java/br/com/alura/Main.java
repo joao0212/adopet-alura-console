@@ -11,7 +11,7 @@ public class Main {
 
     public static void main(String[] args) {
         File file = new File("lista");
-        HttpClient client = new HttpClientFactory().configureHttpClient("http://localhost:8081");
+        HttpClient client = new HttpClientFactory().configureHttpClient();
         FileService fileService = new FileService();
         PetService petService = new PetService();
         String option = args[0].trim();
