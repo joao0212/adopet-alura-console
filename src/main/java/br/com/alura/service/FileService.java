@@ -12,12 +12,12 @@ import java.util.UUID;
 public class FileService {
 
     public void importFile(File file, HttpClient client, PetService petService) {
-        List<Pet> petList = new ArrayList<>();
-        String[] properties = readFile(file);
-        Pet newPet = new Pet(UUID.fromString(properties[0]), properties[1], TipoPet.Cachorro);
-        System.out.println(newPet);
-        petList.add(newPet);
-        for (Pet pet : petList) {
+        System.out.println("----- Serão importados os dados abaixo -----");
+
+        List<Pet> pets = readFile(file);
+        pets.forEach(System.out::println);
+
+        for (Pet pet : pets) {
             try {
                 petService.createPetAsync(client, pet);
             } catch (Exception ex) {
@@ -28,26 +28,24 @@ public class FileService {
     }
 
     public void showFile(File file) {
-        String[] properties = readFile(file);
-        Pet pet = new Pet(UUID.fromString(properties[0]), properties[1], TipoPet.Cachorro);
-        System.out.println(pet);
+        List<Pet> pets = readFile(file);
+        pets.forEach(System.out::println);
     }
 
-    private String[] readFile(File file) {
-        String[] properties = null;
+    private List<Pet> readFile(File file) {
+        List<Pet> pets = new ArrayList<>();
         try {
             InputStream in = new FileInputStream(file);
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 
-            System.out.println("----- Serão importados os dados abaixo -----");
             String line;
             while ((line = reader.readLine()) != null) {
-                properties = line.split(";");
+                String[] properties = line.split(";");
+                pets.add(new Pet(UUID.fromString(properties[0]), properties[1], TipoPet.valueOf(properties[2])));
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return properties;
+        return pets;
     }
 }
