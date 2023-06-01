@@ -1,5 +1,6 @@
 package br.com.alura;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 import java.io.*;
@@ -7,9 +8,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.net.http.HttpRequest.BodyPublishers;
-import java.net.http.HttpResponse.BodyHandlers;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,10 +17,12 @@ public class Main {
 
     public static void main(String[] args) {
         File file = new File("lista");
-        HttpClient client = configureHttpClient("http://localhost:8081");
+        HttpClient client = configureHttpClient();
         try {
             switch (args[0].trim()) {
                 case "import":
+                    System.out.println("----- Serão importados os dados abaixo -----");
+
                     List<Pet> petList = new ArrayList<>();
                     try {
                         InputStream in = new FileInputStream(file);
@@ -28,7 +30,7 @@ public class Main {
                         String line;
                         while ((line = reader.readLine()) != null) {
                             String[] properties = line.split(";");
-                            Pet pet = new Pet(UUID.fromString(properties[0]), properties[1], TipoPet.Cachorro);
+                            Pet pet = new Pet(UUID.fromString(properties[0]), properties[1], TipoPet.valueOf(properties[2]));
                             System.out.println(pet);
                             petList.add(pet);
                         }
@@ -72,11 +74,10 @@ public class Main {
                         InputStream in = new FileInputStream(file);
                         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 
-                        System.out.println("----- Serão importados os dados abaixo -----");
                         String line;
                         while ((line = reader.readLine()) != null) {
                             String[] properties = line.split(";");
-                            Pet pet = new Pet(UUID.fromString(properties[0]), properties[1], TipoPet.Cachorro);
+                            Pet pet = new Pet(UUID.fromString(properties[0]), properties[1], TipoPet.valueOf(properties[2]));
                             System.out.println(pet);
                         }
                     } catch (IOException e) {
@@ -98,7 +99,7 @@ public class Main {
         }
     }
 
-    private static HttpClient configureHttpClient(String url) {
+    private static HttpClient configureHttpClient() {
         HttpClient client = HttpClient.newHttpClient();
         client = client.newBuilder()
                 .version(HttpClient.Version.HTTP_1_1)
@@ -109,29 +110,30 @@ public class Main {
     private static void createPetAsync(HttpClient client, Pet pet) throws IOException, InterruptedException {
         Gson gson = new Gson();
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080/pet/add"))
+                .uri(URI.create("http://localhost:8081/pets"))
                 .header("Content-Type", "application/json")
-                .POST(BodyPublishers.ofString(gson.toJson(pet)))
+                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(pet)))
                 .build();
 
-        HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) {
             throw new RuntimeException("Error creating pet: " + response.body());
         }
     }
 
     private static List<Pet> listPetsAsync(HttpClient client) throws IOException, InterruptedException {
+        ObjectMapper objectMapper = new ObjectMapper();
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080/pet/list"))
+                .uri(URI.create("http://localhost:8081/pets"))
                 .header("Content-Type", "application/json")
+                .GET()
                 .build();
 
-        HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) {
             throw new RuntimeException("Error listing pets: " + response.body());
         }
-
-        List<Pet> pets = new ArrayList<>();
-        return pets;
+        Pet[] pets = objectMapper.readValue(response.body(), Pet[].class);
+        return Arrays.stream(pets).toList();
     }
 }
