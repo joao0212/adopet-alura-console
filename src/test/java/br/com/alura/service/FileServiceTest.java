@@ -20,7 +20,6 @@ public class FileServiceTest {
         verify(petService, atLeast(1));
     }
 
-
     @Test
     public void shouldVerifyIfNotCallPetService() {
         fileService.showFile(new File("lista"));
